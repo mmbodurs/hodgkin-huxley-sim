@@ -40,6 +40,17 @@ def beta_n(V):
     potassium_activation = 0.125 * np.exp(-(V + 65) / 80)
     return potassium_activation
 
-if __name__ == "__main__":
-    for f in [alpha_m, beta_m, alpha_h, beta_h, alpha_n, beta_n]:
-        print(f"{f.__name__}(-65) = {f(-65.0):.4f}")
+#Taking derivatives
+def derivatives(state, I_ext, params=DEFAULT_PARAMS):
+    state = np.array(state)
+    V, m, h, n = state
+
+    I_Na = params["G_NA"] * (m**3) * h * (V - params["E_NA"])
+    I_K = params["G_K"] * (n**4) * (V - params["E_K"])
+    I_L = params["G_L"] * (V - params["E_L"])
+
+    dV = (I_ext - I_Na - I_K - I_L) / params["C_M"]
+    dm = alpha_m(V) * (1 - m) - beta_m(V) * m
+    dh = alpha_h(V) * (1 - h) - beta_h(V) * h
+    dn = alpha_n(V) * (1 - n) - beta_n(V) * n
+    return np.array([dV, dm, dh, dn])
